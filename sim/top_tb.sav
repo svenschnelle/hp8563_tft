@@ -1,37 +1,31 @@
-[timestart] 0
-[size] 2044 1518
+[*]
+[*] GTKWave Analyzer v3.3.107 (w)1999-2020 BSI
+[*] Sun Feb 14 22:29:04 2021
+[*]
+[dumpfile] "/home/svens/devel/fpga/hp8563_lcd/work/top.ghw"
+[dumpfile_mtime] "Sun Feb 14 22:26:49 2021"
+[dumpfile_size] 1096842
+[savefile] "/home/svens/devel/fpga/hp8563_lcd/sim/top_tb.sav"
+[timestart] 39102000000
+[size] 2880 1738
 [pos] -1 -1
-*-28.158655 525000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-28.531145 41060000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.top_tb.
-[treeopen] top.top_tb.spi0.
-[treeopen] top.top_tb.spiflash.
-[treeopen] top.top_tb.spiflash.behavior.
-@200
--LPC slave
+[treeopen] top.top_tb.uut.
+[treeopen] top.top_tb.uut.vgai.
+[sst_width] 457
+[signals_width] 383
+[sst_expanded] 1
+[sst_vpaned_height] 553
 @28
-top.top_tb.lreset_n
-top.top_tb.lclk
+top.top_tb.clk50
+top.top_tb.reset
+top.top_tb.uut.hsync
+top.top_tb.uut.hblank_s
+top.top_tb.uut.vsync
+top.top_tb.uut.vblank_s
 @22
-#{top.top_tb.lad_i[3:0]} top.top_tb.lad_i[3] top.top_tb.lad_i[2] top.top_tb.lad_i[1] top.top_tb.lad_i[0]
-#{top.top_tb.lad_o[3:0]} top.top_tb.lad_o[3] top.top_tb.lad_o[2] top.top_tb.lad_o[1] top.top_tb.lad_o[0]
-@29
-top.top_tb.lad_oe
-@28
-top.top_tb.lframe_n
-top.top_tb.lpc_val
-top.top_tb.lpc_ack
-@200
--SPI flash
-@28
-top.top_tb.spiflash.behavior.instruct
-top.top_tb.spiflash.behavior.current_state
-top.top_tb.spiflash.behavior.address
-@200
--SPI master
-@28
-top.top_tb.so
-top.top_tb.si
-top.top_tb.cs
+#{top.top_tb.uut.sram_addr[21:0]} top.top_tb.uut.sram_addr[21] top.top_tb.uut.sram_addr[20] top.top_tb.uut.sram_addr[19] top.top_tb.uut.sram_addr[18] top.top_tb.uut.sram_addr[17] top.top_tb.uut.sram_addr[16] top.top_tb.uut.sram_addr[15] top.top_tb.uut.sram_addr[14] top.top_tb.uut.sram_addr[13] top.top_tb.uut.sram_addr[12] top.top_tb.uut.sram_addr[11] top.top_tb.uut.sram_addr[10] top.top_tb.uut.sram_addr[9] top.top_tb.uut.sram_addr[8] top.top_tb.uut.sram_addr[7] top.top_tb.uut.sram_addr[6] top.top_tb.uut.sram_addr[5] top.top_tb.uut.sram_addr[4] top.top_tb.uut.sram_addr[3] top.top_tb.uut.sram_addr[2] top.top_tb.uut.sram_addr[1] top.top_tb.uut.sram_addr[0]
 [pattern_trace] 1
 [pattern_trace] 0

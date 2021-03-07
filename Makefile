@@ -1,22 +1,25 @@
 DESIGN=top
-#TARGET=xcr3256xl-7-tq144
-TARGET=xc3s500e-4-fg320
+TARGET=xc3s500e-4pq208
+#TARGET=XC6SLX9-2TQG144
+#TARGET=xc6slx16-2ftg256
 INTSTYLE=-intstyle silent
 
 PROMGENFLAGS=-w -p mcs -c FF
-MAPFLAGS=-cm area -pr b -c 100
+MAPFLAGS=-w -pr b -c 100 -t 1
 NGDFLAGS=-nt timestamp -uc src/$(DESIGN).ucf -dd build
-PARFLAGS=-w -ol std -t 1
-
+PARFLAGS=-w -ol std
 FILES=$(wildcard src/*.vhdl)
-SIMFILES=$(wildcard sim/*.vhdl)
+GHDL=/opt/ghdl/bin/ghdl
+GHDL_FLAGS=-fsynopsys
+
+SIMFILES=sim/test.vhdl
 
 .PHONY: sim mkbuilddir
 
-all: build/$(DESIGN).mcs
+all: download
 
 sim: $(DESIGN)_tb.ghw
-		gtkwave ./$(DESIGN)_tb.ghw sim/$(DESIGN)_tb.sav
+		gtkwave work/$(DESIGN).ghw sim/$(DESIGN)_tb.sav
 
 build/$(DESIGN).mcs:		build/$(DESIGN).bit
 		promgen $(PROMGENFLAGS) -o $@ -u 0 $< -s 4096
@@ -34,10 +37,13 @@ build/$(DESIGN).ngd:		build/$(DESIGN).ngc src/$(DESIGN).ucf
 		ngdbuild -p $(TARGET) $(NGDFLAGS) $< $@
 
 build/$(DESIGN).xst:  build/$(DESIGN).prj Makefile
-		echo "run\n-ifn build/$(DESIGN).prj\n-ifmt mixed\n-top $(DESIGN)\n-ofn build/$(DESIGN)\n-ofmt NGC\n-p $(TARGET)\n-opt_mode Speed\n-opt_level 1\n" >$@
+		echo -e "run\n-ifn build/$(DESIGN).prj\n-ifmt mixed\n-top $(DESIGN)\n-ofn build/$(DESIGN)\n-ofmt NGC\n-p $(TARGET)\n-opt_mode Area\n-opt_level 2\n" >$@
 
 build/$(DESIGN).ngc:  $(FILES) Makefile build/$(DESIGN).xst
 		xst -ifn build/$(DESIGN).xst
+
+build/$(DESIGN).jed: build/$(DESIGN).ncd
+		hprep6 -i top
 
 build/$(DESIGN).prj:
 		mkdir -p build
@@ -45,7 +51,10 @@ build/$(DESIGN).prj:
 		ls src/*.vhdl|sed 's/^/vhdl work /' >> build/$(DESIGN).prj
 
 clean:
-		rm -rf build work xst unisim netlist.lst settings.srp $(DESIGN).lso $(DESIGN)_map.xrpt $(DESIGN)_par.xrpt $(DESIGN).srp flashsim_tb output.txt xilinx_device_details.xml _xmsgs xlnx_auto_*xdb $(DESIGN)_tb.ghw
+		rm -rf build work xst unisim netlist.lst top.*\
+		$(DESIGN)_map.xrpt $(DESIGN)_par.xrpt \
+		flashsim_tb output.txt xilinx_device_details.xml _xmsgs xlnx_auto_*xdb \
+		$(DESIGN)_build.xml $(DESIGN)_pad.csv
 
 download:	build/$(DESIGN).bit
 		xc3sprog $<
@@ -53,8 +62,21 @@ download:	build/$(DESIGN).bit
 $(DESIGN)_tb.ghw:	$(FILES) $(SIMFILES) Makefile
 		rm -rf work unisim
 		mkdir -p work unisim
-		ghdl -i --work=unisim --workdir=unisim $(XILINX)/vhdl/src/unisims/*.vhd
-		ghdl -i --work=unisim --workdir=unisim $(XILINX)/vhdl/src/unisims/primitive/*.vhd
-		ghdl -i -g --workdir=work src/*.vhdl sim/*.vhdl
-		ghdl -m -g -Punisim -fexplicit --workdir=work --ieee=synopsys $(DESIGN)_tb
-		ghdl -r $(DESIGN)_tb  --stop-time=10us --wave=$@ --stack-size=100000000
+		$(GHDL) -a $(GHDL_FLAGS) $(FILES)
+#		$(GHDL) -a $(GHDL_FLAGS) -fsynopsys $(SIMFILES_SYNOPSYS)
+		$(GHDL) -a $(GHDL_FLAGS) -fsynopsys $(SIMFILES)
+		$(GHDL) -r $(DESIGN)_tb --stop-time=1ms --wave=work/$(DESIGN).ghw --assert-level=note
+
+charcopy_tb.ghw:	$(FILES) $(SIMFILES) Makefile
+			rm -rf work unisim
+			mkdir -p work unisim
+			$(GHDL) -a --std=08 -fsynopsis sim/package_timing.vhdl
+			$(GHDL) -a -fsynopsis  sim/package_utility.vhdl
+			$(GHDL) -a --std=08 -fsynopsis  sim/16M_Async_SRAM.vhdl
+			$(GHDL) -a -fsynopsis sim/charcopy_tb.vhdl
+			$(GHDL) -a -fsynopsis sim/test_tb.vhdl
+			$(GHDL) -c -g --workdir=work  src/*.vhdl -r charcopy_tb --stop-time=1000us --wave=work/charcopy_tb.ghw
+			gtkwave work/$@ sim/$@.sav
+
+download: build/$(DESIGN).bit
+	impact -batch impact.scr
