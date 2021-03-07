@@ -1,0 +1,6 @@
+setmode -bscan
+setcable -p auto
+identify
+assignfile -p 1 -file /home/svens/devel/fpga/hp8563_lcd/build/top.bit
+program -p 1
+quit
