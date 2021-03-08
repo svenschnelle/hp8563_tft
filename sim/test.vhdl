@@ -85,7 +85,7 @@ BEGIN
 		read_addr_i => romaddr_s,
 		read_data_o => romdata_s);
 
-     sram: async_1Mx16 port map(
+	sram: async_1Mx16 port map(
 		CE_b => '0',
 		BHE_b => '0',
 		BLE_b => '0',
@@ -96,7 +96,7 @@ BEGIN
 
 clocker: process is
 begin
-	wait for 20 ns;
+	wait for 10 ns;
 	clk50 <= not clk50;
 end process clocker;
 

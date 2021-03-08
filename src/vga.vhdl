@@ -14,7 +14,7 @@ entity vga is
 	      b_o: out std_logic_vector(1 downto 0);
 	      hblank_o: out boolean;
 	      ram_addr_o: out integer range 0 to 640*480;
-	      ram_data_i: in std_logic_vector(3 downto 0));
+	      ram_data_i: in std_logic_vector(15 downto 0));
 end vga;
 
 architecture rtl of vga is
@@ -40,7 +40,7 @@ vsync_o <= '0' when vsync_s else '1';
 hblank_o <= hblank_s;
 vblank_o <= vblank_s;
 dclk_o <= display_clk_s;
-ram_addr_o <= ram_addr_s;
+ram_addr_o <= ram_addr_s/4;
 
 b_o <= (others => '0') when hblank_s or vblank_s else color_s(1 downto 0);
 r_o <= (others => '0') when hblank_s or vblank_s else color_s(3 downto 2);
@@ -48,9 +48,11 @@ g_o <= (others => '0') when hblank_s or vblank_s else color_s(5 downto 4);
 
 
 process(reset_i, clk_i)
+variable clkdiv: integer;
 begin
 	if (reset_i) then
 		display_clk_s <= '0';
+		clkdiv := 0;
 	elsif (rising_edge(clk_i)) then
 		display_clk_s <= not display_clk_s;
 	end if;
@@ -62,7 +64,18 @@ begin
 	if (reset_i) then
 		color_s <= (others => '0');
 	elsif (rising_edge(display_clk_s)) then
-		color_s <= colors(to_integer(unsigned(ram_data_i)));
+		case (ram_addr_s mod 4) is
+			when 0 =>
+				color_s <= colors(to_integer(unsigned(ram_data_i(3 downto 0))));
+			when 1 =>
+				color_s <= colors(to_integer(unsigned(ram_data_i(7 downto 4))));
+			when 2 =>
+				color_s <= colors(to_integer(unsigned(ram_data_i(11 downto 8))));
+			when 3 =>
+				color_s <= colors(to_integer(unsigned(ram_data_i(15 downto 12))));
+			when others =>
+				color_s <= (others => '0');
+		end case;
 	end if;
 end process;
 

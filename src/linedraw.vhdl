@@ -13,15 +13,17 @@ entity linedraw is
 	     req_i: in boolean;
 	     rdy_o: out boolean;
 	     ramaddr_o: out integer range 0 to 640*480-1;
-	     ramdata_o: out std_logic_vector(3 downto 0);
-	     ramdata_i: in std_logic_vector(3 downto 0);
+	     ramdata_o: out std_logic_vector(15 downto 0);
+	     ramdata_i: in std_logic_vector(15 downto 0);
 	     ram_rdy_i: in boolean;
 	     ram_we_o: out boolean);
 end linedraw;
 
 architecture rtl of linedraw is
-
+signal ramaddr_s: integer := 0;
 begin
+
+ramaddr_o <= ramaddr_s / 4;
 
 draw: process(reset_i, clk_i)
 type state_t is (IDLE, XCH, XCH1, DRAW_READ, DRAW_WAIT, DRAW_WRITE);
@@ -106,15 +108,16 @@ begin
 				y := y1;
 				state := DRAW_READ;
 			when DRAW_READ =>
+				ram_we_o <= false;
 				if (x = x2) then
 					state := IDLE;
 					rdy_o <= true;
 				else
-					ram_we_o <= false;
+
 					if (c1) then
-						ramaddr_o <= ((x * 640) + y);
+						ramaddr_s <= ((x * 640) + y);
 					else
-						ramaddr_o <= ((y * 640) + x);
+						ramaddr_s <= ((y * 640) + x);
 					end if;
 					state := DRAW_WAIT;
 				end if;
@@ -124,11 +127,29 @@ begin
 				end if;
 			when DRAW_WRITE =>
 				ram_we_o <= true;
-				if (ramdata_i = color_i) then
-					ramdata_o <= '1' & ramdata_i(2 downto 0);
-				else
-					ramdata_o <= color_i;
-				end if;
+				case (ramaddr_s mod 4) is
+					when 3 =>
+						ramdata_o(3 downto 0) <= color_i or ramdata_i(3 downto 0);
+						ramdata_o(15 downto 4) <= ramdata_i(15 downto 4);
+					when 2 =>
+						ramdata_o(3 downto 0) <= ramdata_i(3 downto 0);
+						ramdata_o(7 downto 4) <= color_i or ramdata_i(7 downto 4);
+						ramdata_o(15 downto 8) <= ramdata_i(15 downto 8);
+					when 1 =>
+						ramdata_o(7 downto 0) <= ramdata_i(7 downto 0);
+						ramdata_o(11 downto 8) <= color_i or ramdata_i(11 downto 8);
+						ramdata_o(15 downto 12) <= ramdata_i(15 downto 12);
+					when 0 =>
+						ramdata_o(11 downto 0) <= ramdata_i(11 downto 0);
+						ramdata_o(15 downto 12) <= color_i or ramdata_i(15 downto 12);
+					when others =>
+				end case;
+
+--				if (ramdata_i = color_i) then
+--					ramdata_o <= '1' & ramdata_i(2 downto 0);
+--				else
+--					ramdata_o <= color_i;
+--				end if;
 				if (ram_rdy_i) then
 					if (e > 0) then
 						y := y + incy;

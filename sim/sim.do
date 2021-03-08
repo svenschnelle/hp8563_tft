@@ -4,6 +4,9 @@ vlib unisim
 vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/unisim_VCOMP.vhd
 vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/unisim_VPKG.vhd
 vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/primitive/RAMB16_S1.vhd
+#vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/primitive/DCM.vhd
+#vcom -work unisim /opt/Xilinx/14.7/ISE_DS/PlanAhead/data/vhdl/src/unisims/primitive/DCM_SP.vhd
+#vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/primitive/BUFG.vhd
 vlib unimacro
 vcom -work unimacro /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unimacro/unimacro_VCOMP.vhd
 vlib work
@@ -19,7 +22,9 @@ add wave -radix hex -r /top_tb/uut/read_data_s
 add wave -radix hex -r /top_tb/uut/read_addr_s
 add wave -group cpu -radix hex -r /top_tb/uut/curx_s
 add wave -group cpu -radix hex -r /top_tb/uut/cury_s
-add wave -group cpu -radix hex -r /top_tb/uut/render/state
+#add wave -group dcm -radix hex -r /top_tb/uut/dcmi/*
+add wave -group render -radix hex -r /top_tb/uut/render/*
+
 add wave -group cpu -radix hex -r /top_tb/uut/render_we_s
 add wave -group cpu -radix hex -r /top_tb/uut/render_write_data_s
 add wave -group cpu -radix hex -r /top_tb/uut/dpaddr
@@ -37,6 +42,6 @@ add wave -group sram -radix hex -r /top_tb/uut/sram_data
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/state
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/ramdata
 #add wave -group charcopy -radix ascii -r /top_tb/uut/charcopyi/char_i
-run 120ms
+run 50ms
 
-mem save -o mem0.mem -f mti -data hex -addr hex -wordsperline 640 /top_tb/sram/line__100/mem_array
+mem save -o mem0.mem -f mti -data hex -addr hex -wordsperline 160 /top_tb/sram/line__100/mem_array
