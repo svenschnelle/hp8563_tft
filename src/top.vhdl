@@ -203,28 +203,33 @@
 		-- 	CLK0_OUT => dcm_clk0_s,
 		-- 	LOCKED_OUT => dcm_locked_s);
 
-		ram0: dpram generic map(
-			wordsize => 8,
-			arraysize => 8192)
-			port map(
-				write_clock_i => cpu_clk,
-				write_data_i => cpu_data(7 downto 0),
-				write_addr_i => write_ram_addr_s,
-				write_i => cpu_wel,
-				read_clock_i => clk,
-				read_addr_i => read_addr_s,
-				read_data_o => read_data_s(7 downto 0));
-		ram1: dpram generic map(
-			wordsize => 8,
-			arraysize => 8192)
-			port map(
-				write_clock_i => cpu_clk,
-				write_data_i => cpu_data(15 downto 8),
-				write_addr_i => write_ram_addr_s,
-				write_i => cpu_weh,
-				read_clock_i => clk,
-				read_addr_i => read_addr_s,
-				read_data_o => read_data_s(15 downto 8));
+		testromi: testrom port map(
+			read_clock_i => clk,
+			read_addr_i => read_addr_s,
+			read_data_o => read_data_s
+			);
+		-- ram0: dpram generic map(
+		-- 	wordsize => 8,
+		-- 	arraysize => 8192)
+		-- 	port map(
+		-- 		write_clock_i => cpu_clk,
+		-- 		write_data_i => cpu_data(7 downto 0),
+		-- 		write_addr_i => write_ram_addr_s,
+		-- 		write_i => cpu_wel,
+		-- 		read_clock_i => clk,
+		-- 		read_addr_i => read_addr_s,
+		-- 		read_data_o => read_data_s(7 downto 0));
+		-- ram1: dpram generic map(
+		-- 	wordsize => 8,
+		-- 	arraysize => 8192)
+		-- 	port map(
+		-- 		write_clock_i => cpu_clk,
+		-- 		write_data_i => cpu_data(15 downto 8),
+		-- 		write_addr_i => write_ram_addr_s,
+		-- 		write_i => cpu_weh,
+		-- 		read_clock_i => clk,
+		-- 		read_addr_i => read_addr_s,
+		-- 		read_data_o => read_data_s(15 downto 8));
 
 		charmapi: charmap port map(
 			input => charmap_input_s,
@@ -311,7 +316,7 @@
 				if (rambank0_active_s) then
 					sram_addr <= std_logic_vector(to_unsigned(vga_ram_addr_s, sram_addr'length));
 				else
-					sram_addr <= std_logic_vector(to_unsigned(307200/4 + vga_ram_addr_s, sram_addr'length));
+					sram_addr <= std_logic_vector(to_unsigned(131072 + vga_ram_addr_s, sram_addr'length));
 				end if;
 				sram_we <= '1';
 				sram_oe <= '0';
@@ -321,7 +326,7 @@
 			when 1 =>
 
 				if (rambank0_active_s) then
-					sram_addr <= std_logic_vector(to_unsigned(307200/4 + fbram_tmp_addr, sram_addr'length));
+					sram_addr <= std_logic_vector(to_unsigned(131072 + fbram_tmp_addr, sram_addr'length));
 				else
 					sram_addr <= std_logic_vector(to_unsigned(fbram_tmp_addr, sram_addr'length));
 				end if;
@@ -336,8 +341,6 @@
 				end if;
 
 				vga_ram_data_s <= sram_data;
-
-
 				ram_rdy_s <= false;
 				cnt := 0;
 			end case;
@@ -392,11 +395,11 @@ render: process(reset_s, clk)
 						else
 							render_we_s <= true;
 							render_write_data_s <= x"0000";
-							render_addr_s <= render_addr_s + 1;
 							state := CLEAR_RAM2;
 						end if;
 				when CLEAR_RAM2 =>
 					state := CLEAR_RAM;
+					render_addr_s <= render_addr_s + 1;
 				when FETCH =>
 					vblank_prev_s <= vblank_s;
 					if (not vblank_prev_s and vblank_s) then
@@ -422,7 +425,7 @@ render: process(reset_s, clk)
 						end if;
 						case read_data_s(15 downto 12) is
 							when x"0" | x"1"  =>
-								if (visible and read_data_s /= x"0000") then
+								if (visible) then
 									dsty_s <= y;
 									visible := true;
 									linedraw_active_s <= true;

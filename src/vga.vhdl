@@ -20,6 +20,7 @@ end vga;
 architecture rtl of vga is
 
 signal ram_addr_s: integer := 0;
+signal ram_addr_delayed_s: integer := 0;
 signal display_addr_s: integer := 0;
 signal hsync_s: boolean;
 signal hsync_prev_s: boolean;
@@ -58,26 +59,11 @@ begin
 	end if;
 end process;
 
-
-pixmux: process(reset_i, display_clk_s)
-begin
-	if (reset_i) then
-		color_s <= (others => '0');
-	elsif (rising_edge(display_clk_s)) then
-		case (ram_addr_s mod 4) is
-			when 0 =>
-				color_s <= colors(to_integer(unsigned(ram_data_i(3 downto 0))));
-			when 1 =>
-				color_s <= colors(to_integer(unsigned(ram_data_i(7 downto 4))));
-			when 2 =>
-				color_s <= colors(to_integer(unsigned(ram_data_i(11 downto 8))));
-			when 3 =>
-				color_s <= colors(to_integer(unsigned(ram_data_i(15 downto 12))));
-			when others =>
-				color_s <= (others => '0');
-		end case;
-	end if;
-end process;
+color_s <= colors(to_integer(unsigned(ram_data_i(3 downto 0)))) when ram_addr_delayed_s mod 4 = 3 else
+	   colors(to_integer(unsigned(ram_data_i(7 downto 4)))) when ram_addr_delayed_s mod 4 = 2 else
+	   colors(to_integer(unsigned(ram_data_i(11 downto 8)))) when ram_addr_delayed_s mod 4 = 1 else
+	   colors(to_integer(unsigned(ram_data_i(15 downto 12)))) when ram_addr_delayed_s mod 4 = 0 else
+	   (others => '0');
 
 hsynccnt: process(reset_i, display_clk_s)
 variable hcnt: integer range 0 to 820;
@@ -101,6 +87,7 @@ begin
 		elsif (vblank_s) then
 			ram_addr_s <= 0;
 		end if;
+		ram_addr_delayed_s <= ram_addr_s;
 	end if;
 end process;
 
