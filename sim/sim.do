@@ -32,6 +32,7 @@ add wave -group cpu -radix hex -r /top_tb/uut/rambank0_active_s
 add wave -group linedraw -radix hex -r /top_tb/uut/linedrawi/*
 add wave -group linedraw -radix hex -r /top_tb/uut/linedrawi/draw/*
 add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/*
+add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/*
 add wave -group vga -radix hex -r /top_tb/uut/vgai/*
 add wave -group sram -radix hex -r /top_tb/uut/sram_oe
 add wave -group sram -radix hex -r /top_tb/uut/sram_we

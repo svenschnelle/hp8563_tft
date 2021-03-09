@@ -527,7 +527,9 @@ render: process(reset_s, clk)
 					if (linedraw_rdy_s) then
 						linedraw_active_s <= false;
 						state := FETCH;
-						dstx_s <= dstx_s + 1;
+						if (dstx_s < 639) then
+							dstx_s <= dstx_s + 1;
+						end if;
 						curx_s <= dstx_s;
 						cury_s <= dsty_s;
 					end if;

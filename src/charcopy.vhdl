@@ -41,7 +41,7 @@ begin
 ramaddr_o <= ramaddr_s / 4;
 
 copy: process(reset_i, clk_i)
-type state_t is (IDLE, READ, UPDATE_READ, UPDATE_WAIT, UPDATE_WRITE);
+type state_t is (IDLE, WAITSTATE, READ, UPDATE_READ, UPDATE_WAIT, UPDATE_WRITE);
 variable state: state_t;
 variable charstart: integer;
 variable cur_x: integer := 0;
@@ -60,17 +60,18 @@ begin
 			when IDLE =>
 				ram_we_o <= false;
 				if (req_i) then
-					rdy_o <= false;
-					state := READ;
-					cur_x := 0;
-					cur_y <= 0;
 					charstart := ((char_i - 32) * 14 * 12);
 					font_addr_s <= charstart;
+					rdy_o <= false;
+					state := WAITSTATE;
+					cur_x := 0;
+					cur_y <= 0;
 				else
 					rdy_o <= true;
 				end if;
+			when WAITSTATE =>
+				state := READ;
 			when READ =>
-				font_addr_s <= font_addr_s + 1;
 				ram_we_o <= false;
 
 				if (font_data_s(0) = '1') then
@@ -82,20 +83,24 @@ begin
 							state := IDLE;
 						else
 							cur_y <= cur_y + 1;
+							font_addr_s <= font_addr_s + 1;
 							state := READ;
 						end if;
 					else
 						cur_x := cur_x + 1;
+						font_addr_s <= font_addr_s + 1;
 						state := READ;
 					end if;
 				end if;
 			when UPDATE_READ =>
 				ramaddr_s <= ((dsty_i + cur_y + 3) * 640 + dstx_i + cur_x + 8);
 				state := UPDATE_WAIT;
+
 			when UPDATE_WAIT =>
 				if (ram_rdy_i) then
 					state := UPDATE_WRITE;
 				end if;
+
 			when UPDATE_WRITE =>
 				ram_we_o <= true;
 				case (ramaddr_s mod 4) is
@@ -122,10 +127,12 @@ begin
 							state := IDLE;
 						else
 							cur_y <= cur_y + 1;
+							font_addr_s <= font_addr_s + 1;
 							state := READ;
 						end if;
 					else
 						cur_x := cur_x + 1;
+						font_addr_s <= font_addr_s + 1;
 						state := READ;
 					end if;
 				end if;
