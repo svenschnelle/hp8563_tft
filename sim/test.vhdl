@@ -123,7 +123,7 @@ begin
 			when DELAY2 =>
 				state := WRITE;
 			when WRITE =>
---				cpu_wr_s <= '0';
+				cpu_wr_s <= '0';
 				cpu_data <= romdata_s;
 				state := READ;
 				i := i + 1;

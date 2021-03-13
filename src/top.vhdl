@@ -399,7 +399,7 @@ begin
 									curx_s <= dstx_s;
 								end if;
 								-- 2404 blank not cleared on y
-								if (plotconfig_s = x"02") then
+								if (plotconfig_s = x"02" or plotconfig_s = x"05") then
 									visible := true;
 								end if;
 							when x"2" =>
@@ -407,8 +407,6 @@ begin
 									linedraw_color_s <= x"e";
 								elsif (read_data_s = x"2405") then
 									linedraw_color_s <= x"d";
-								else
-									linedraw_color_s <= x"c";
 								end if;
 
 								dsty_s <= y;
