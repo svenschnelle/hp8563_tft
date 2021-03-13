@@ -37,7 +37,7 @@ build/$(DESIGN).ngd:		build/$(DESIGN).ngc src/$(DESIGN).ucf
 		ngdbuild -p $(TARGET) $(NGDFLAGS) $< $@
 
 build/$(DESIGN).xst:  build/$(DESIGN).prj Makefile
-		echo -e "run\n-ifn build/$(DESIGN).prj\n-ifmt mixed\n-top $(DESIGN)\n-ofn build/$(DESIGN)\n-ofmt NGC\n-p $(TARGET)\n-opt_mode Area\n-opt_level 2\n" >$@
+		/bin/echo -e "run\n-ifn build/$(DESIGN).prj\n-ifmt mixed\n-top $(DESIGN)\n-ofn build/$(DESIGN)\n-ofmt NGC\n-p $(TARGET)\n-opt_mode Area\n-opt_level 2\n" >$@
 
 build/$(DESIGN).ngc:  $(FILES) Makefile build/$(DESIGN).xst
 		xst -ifn build/$(DESIGN).xst

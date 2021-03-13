@@ -894,7 +894,7 @@ begin
 				when 16#036e# => read_data_o <= x"0000";
 				when 16#036f# => read_data_o <= x"0000";
 				when 16#0370# => read_data_o <= x"0000";
-				when 16#0371# => read_data_o <= x"a000";
+				when 16#0371# => read_data_o <= x"6190";
 				when 16#0372# => read_data_o <= x"027f";
 				when 16#0373# => read_data_o <= x"4194";
 				when 16#0374# => read_data_o <= x"0285";
@@ -1022,7 +1022,7 @@ begin
 				when 16#03ee# => read_data_o <= x"0000";
 				when 16#03ef# => read_data_o <= x"0000";
 				when 16#03f0# => read_data_o <= x"0000";
-				when 16#03f1# => read_data_o <= x"a000";
+				when 16#03f1# => read_data_o <= x"2402";
 				when 16#03f2# => read_data_o <= x"7064";
 				when 16#03f3# => read_data_o <= x"00ba";
 				when 16#03f4# => read_data_o <= x"0064";

@@ -9,9 +9,9 @@
 		      hsync_o: out std_logic;
 		      enable: out std_logic;
 		      dclk: out std_logic;
-		      r: out std_logic_vector(1 downto 0);
-		      g: out std_logic_vector(1 downto 0);
-		      b: out std_logic_vector(1 downto 0);
+		      r: out std_logic_vector(2 downto 0);
+		      g: out std_logic_vector(2 downto 0);
+		      b: out std_logic_vector(2 downto 0);
 		      -- cpu
 		      cpu_clk: in std_logic;
 		      cpu_addr: in std_logic_vector(12 downto 0);
@@ -23,6 +23,7 @@
 		      sram_data: inout std_logic_vector(15 downto 0);
 		      sram_oe: out std_logic;
 		      sram_we: out std_logic;
+		sram_ce: out std_logic;
 		      sram_bhe: out std_logic;
 		      sram_ble: out std_logic;
 		      -- debug
@@ -30,15 +31,6 @@
 	end top;
 
 	architecture rtl of top is
-	-- component DCM is
-	-- 	port (CLKIN_IN: in std_logic;
-	-- 	RST_IN: in std_logic;
-	-- 	CLKDV_OUT: out std_logic;
-	-- 	CLKFX_OUT: out std_logic;
-	-- 	CLK2X_OUT: out std_logic;
-	-- 	CLK0_OUT: out std_logic;
-	-- 	LOCKED_OUT: out std_logic);
-	-- end component;
 
 	component dpram is
 		generic(arraysize: integer;
@@ -53,13 +45,6 @@
 	);
 	end component;
 
-	component testrom is
-	port(read_clock_i: in std_logic;
-		read_addr_i: in integer range 0 to 8191;
-		read_data_o: out std_logic_vector(15 downto 0)
-	     );
-	end component;
-
 	component vga is
 		port (clk_i: in std_logic;
 		      dclk_o: out std_logic;
@@ -68,9 +53,9 @@
 		      hsync_o: out std_logic;
 		      vblank_o: out boolean;
 		      hblank_o: out boolean;
-		      r_o: out std_logic_vector(1 downto 0);
-		      g_o: out std_logic_vector(1 downto 0);
-		      b_o: out std_logic_vector(1 downto 0);
+		      r_o: out std_logic_vector(2 downto 0);
+		      g_o: out std_logic_vector(2 downto 0);
+		      b_o: out std_logic_vector(2 downto 0);
 		      ram_addr_o: out integer range 0 to 640*480;
 		      ram_data_i: in std_logic_vector(15 downto 0));
 	end component;
@@ -180,56 +165,35 @@
 	signal fbram_tmp_addr: integer;
 	signal ram_rdy_s: boolean;
 	signal plotx: integer;
-	signal plotconfig_s: std_logic_vector(7 downto 0);
 	signal dpaddr: integer range 0 to 8191 := 0;
 	signal dpaddr_next: integer range 0 to 8191 := 0;
 	constant XINIT: integer := 60;
 
-	-- signal dcm_clkdv_s: std_logic;
-	-- signal dcm_clkfx_s: std_logic;
-	-- signal dcm_clk0_s: std_logic;
-	-- signal dcm_locked_s: std_logic;
-	-- signal dcm_reset_s: std_logic;
-
 	type render_state_t is (IDLE, CLEAR_RAM, CLEAR_RAM2, FETCH, FETCH2, EXECUTE, CHARCOPY_WAIT, CHARCOPY_WAIT1, LINEDRAW_WAIT, LINEDRAW_WAIT1);
 
 	begin
-		-- dcmi: DCM port map(
-		-- 	CLKIN_IN => clk50,
-		-- 	RST_IN => dcm_reset_s,
-		-- 	CLKDV_OUT => dcm_clkdv_s,
-		-- 	CLKFX_OUT => dcm_clkfx_s,
-		-- 	CLK2X_OUT => clk,
-		-- 	CLK0_OUT => dcm_clk0_s,
-		-- 	LOCKED_OUT => dcm_locked_s);
-
-		testromi: testrom port map(
-			read_clock_i => clk,
-			read_addr_i => read_addr_s,
-			read_data_o => read_data_s
-			);
-		-- ram0: dpram generic map(
-		-- 	wordsize => 8,
-		-- 	arraysize => 8192)
-		-- 	port map(
-		-- 		write_clock_i => cpu_clk,
-		-- 		write_data_i => cpu_data(7 downto 0),
-		-- 		write_addr_i => write_ram_addr_s,
-		-- 		write_i => cpu_wel,
-		-- 		read_clock_i => clk,
-		-- 		read_addr_i => read_addr_s,
-		-- 		read_data_o => read_data_s(7 downto 0));
-		-- ram1: dpram generic map(
-		-- 	wordsize => 8,
-		-- 	arraysize => 8192)
-		-- 	port map(
-		-- 		write_clock_i => cpu_clk,
-		-- 		write_data_i => cpu_data(15 downto 8),
-		-- 		write_addr_i => write_ram_addr_s,
-		-- 		write_i => cpu_weh,
-		-- 		read_clock_i => clk,
-		-- 		read_addr_i => read_addr_s,
-		-- 		read_data_o => read_data_s(15 downto 8));
+		ram0: dpram generic map(
+			wordsize => 8,
+			arraysize => 8192)
+			port map(
+				write_clock_i => clk,
+				write_data_i => cpu_data(7 downto 0),
+				write_addr_i => write_ram_addr_s,
+				write_i => not cpu_wel,
+				read_clock_i => clk,
+				read_addr_i => read_addr_s,
+				read_data_o => read_data_s(7 downto 0));
+		ram1: dpram generic map(
+			wordsize => 8,
+			arraysize => 8192)
+			port map(
+				write_clock_i => clk,
+				write_data_i => cpu_data(15 downto 8),
+				write_addr_i => write_ram_addr_s,
+				write_i => not cpu_weh,
+				read_clock_i => clk,
+				read_addr_i => read_addr_s,
+				read_data_o => read_data_s(15 downto 8));
 
 		charmapi: charmap port map(
 			input => charmap_input_s,
@@ -283,8 +247,8 @@
 --	dcm_reset_s <= '1' when reset_s else '0';
 	curx_scaled_s <= ((curx_s * 105) / 128);
 	dstx_scaled_s <= ((dstx_s * 105) / 128);
-	cury_scaled_s <= (cury_s * 80) / 128;
-	dsty_scaled_s <= (dsty_s * 80) / 128;
+	cury_scaled_s <= (cury_s * 82) / 128;
+	dsty_scaled_s <= (dsty_s * 82) / 128;
 
 
 	write_ram_addr_s <= to_integer(unsigned(cpu_addr));
@@ -306,7 +270,7 @@
 	dclk <= not vga_display_clk_s;
 	sram_ble <= '0';
 	sram_bhe <= '0';
-
+	sram_ce <= '0';
 	rammux: process(clk)
 	variable cnt: integer range 0 to 1;
 	begin
@@ -368,16 +332,15 @@ render: process(reset_s, clk)
 	variable visible: boolean;
 	variable x: integer;
 	variable y: integer;
-	variable autoincx: boolean;
-	begin
-		if (reset_s) then
+	variable plotconfig_s: std_logic_vector(7 downto 0);
+begin
+	if (reset_s) then
 			rambank0_active_s <= false;
 			state := CLEAR_RAM;
 			dstx_s <= 512;
 			dsty_s <= 0;
 			curx_s <= 512;
 			cury_s <= 0;
-			autoincx := false;
 		elsif (rising_edge(clk)) then
 			read_addr_s <= dpaddr;
 
@@ -391,6 +354,7 @@ render: process(reset_s, clk)
 				when CLEAR_RAM =>
 						if (render_addr_s = (640*480/4)-1) then
 							state := FETCH;
+							render_addr_s <= 0;
 							render_we_s <= false;
 						else
 							render_we_s <= true;
@@ -427,7 +391,6 @@ render: process(reset_s, clk)
 							when x"0" | x"1"  =>
 								if (visible) then
 									dsty_s <= y;
-									visible := true;
 									linedraw_active_s <= true;
 									linedraw_req_s <= true;
 									state := LINEDRAW_WAIT;
@@ -435,22 +398,27 @@ render: process(reset_s, clk)
 									cury_s <= y;
 									curx_s <= dstx_s;
 								end if;
-								visible := true;
+								-- 2404 blank not cleared on y
+								if (plotconfig_s = x"02") then
+									visible := true;
+								end if;
 							when x"2" =>
-								autoincx := true;
 								if (read_data_s = x"2402") then
 									linedraw_color_s <= x"e";
 								elsif (read_data_s = x"2405") then
 									linedraw_color_s <= x"d";
-								elsif (read_data_s = x"2403") then
+								else
+									linedraw_color_s <= x"c";
 								end if;
 
 								dsty_s <= y;
 								dstx_s <= dstx_s + 1;
 								curx_s <= dstx_s;
 								cury_s <= dsty_s;
-								plotconfig_s <= read_data_s(7 downto 0);
-								visible := true;
+								if (read_data_s(10) = '1') then
+									plotconfig_s := read_data_s(7 downto 0);
+								end if;
+								visible := false;
 
 							when x"3" =>
 								linedraw_color_s <= x"d";
@@ -458,8 +426,7 @@ render: process(reset_s, clk)
 								dsty_s <= y;
 								curx_s <= dstx_s;
 								cury_s <= dsty_s;
-								plotconfig_s <= read_data_s(7 downto 0);
-								visible := true;
+								visible := false;
 
 							when x"4" => -- move x visible
 								linedraw_color_s <= x"f";
@@ -467,12 +434,12 @@ render: process(reset_s, clk)
 								dstx_s <= x;
 
 							when x"5" => -- move x visible
-								linedraw_color_s <= x"5";
+								linedraw_color_s <= x"7";
 								visible := true;
 								dstx_s <= x;
 
 							when x"6" => -- move x invisible?
-								linedraw_color_s <= x"b";
+								linedraw_color_s <= x"0";
 								visible := false;
 								dstx_s <= x;
 
@@ -505,7 +472,8 @@ render: process(reset_s, clk)
 							when others =>
 						end case;
 					else
-						state := IDLE;
+						dpaddr <= 0;
+						state := FETCH;
 					end if;
 				when CHARCOPY_WAIT =>
 					if (not charcopy_rdy_s) then

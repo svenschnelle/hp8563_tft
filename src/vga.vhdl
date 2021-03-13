@@ -9,9 +9,9 @@ entity vga is
 	      vsync_o: out std_logic;
 	      hsync_o: out std_logic;
 	      vblank_o: out boolean;
-	      r_o: out std_logic_vector(1 downto 0);
-	      g_o: out std_logic_vector(1 downto 0);
-	      b_o: out std_logic_vector(1 downto 0);
+	      r_o: out std_logic_vector(2 downto 0);
+	      g_o: out std_logic_vector(2 downto 0);
+	      b_o: out std_logic_vector(2 downto 0);
 	      hblank_o: out boolean;
 	      ram_addr_o: out integer range 0 to 640*480;
 	      ram_data_i: in std_logic_vector(15 downto 0));
@@ -28,11 +28,28 @@ signal vsync_s: boolean;
 signal hblank_s: boolean;
 signal vblank_s: boolean;
 signal display_clk_s: std_logic;
-signal color_s: std_logic_vector(5 downto 0);
-type color_type is array (0 to 15) of std_logic_vector(5 downto 0);
+signal color_s: std_logic_vector(8 downto 0);
+type color_type is array (0 to 15) of std_logic_vector(8 downto 0);
+
 constant colors : color_type := (
-	"000000", "010101", "010101", "010101",	"010101", "010101", "010101", "010101",
-	"111111", "111111", "111111", "111111", "111111", "111111", "111100", "111111");
+	-- R      G       B
+	"000" & "000" & "000", -- 0
+	"000" & "000" & "011", -- 1
+	"011" & "000" & "000", -- 2
+	"011" & "000" & "011", -- 3
+	"000" & "011" & "000", -- 4
+	"000" & "011" & "011", -- 5
+	"011" & "011" & "000", -- 6
+	"011" & "011" & "011", -- 7
+	"000" & "000" & "000", -- 8
+	"000" & "000" & "111", -- 9
+	"111" & "000" & "000", -- 10
+	"111" & "000" & "111", -- 11
+	"000" & "111" & "000", -- 12
+	"000" & "111" & "111", -- 13
+	"111" & "111" & "000", -- 14
+	"111" & "111" & "111"  -- 15
+	);
 
 begin
 
@@ -43,10 +60,9 @@ vblank_o <= vblank_s;
 dclk_o <= display_clk_s;
 ram_addr_o <= ram_addr_s/4;
 
-b_o <= (others => '0') when hblank_s or vblank_s else color_s(1 downto 0);
-r_o <= (others => '0') when hblank_s or vblank_s else color_s(3 downto 2);
-g_o <= (others => '0') when hblank_s or vblank_s else color_s(5 downto 4);
-
+b_o <= (others => '0') when hblank_s or vblank_s else color_s(2 downto 0);
+g_o <= (others => '0') when hblank_s or vblank_s else color_s(5 downto 3);
+r_o <= (others => '0') when hblank_s or vblank_s else color_s(8 downto 6);
 
 process(reset_i, clk_i)
 variable clkdiv: integer;

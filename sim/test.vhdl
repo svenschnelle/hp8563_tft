@@ -66,7 +66,8 @@ signal sram_addr_s: std_logic_vector(19 downto 0);
 signal sram_data_s: std_logic_vector(15 downto 0);
 signal sram_we_s: std_logic;
 signal sram_oe_s: std_logic;
-
+signal write_addr_s: integer;
+type state_t is (READ, DELAY, DELAY2, WRITE);
 BEGIN
 	uut: top port map(
 		clk => clk50,
@@ -100,18 +101,34 @@ begin
 	clk50 <= not clk50;
 end process clocker;
 
-main: process is
+
+
+main: process(clk50)
+variable i: integer := 0;
+variable state: state_t;
 begin
-	wait for 100 us;
-	for i in 0 to 8191 loop
-		romaddr_s <= i;
-		cpu_data <= romdata_s;
-		cpu_addr <= std_logic_vector(to_unsigned(i, cpu_addr'length));
-		wait until falling_edge(clk50);
-		cpu_wr_s <= '0';
-		wait until falling_edge(clk50);
-		cpu_wr_s <= '1';
-	end loop;
-	wait;
+	cpu_wr_s <= '1';
+
+	if (rising_edge(clk50)) then
+		case state is
+			when READ =>
+				cpu_wr_s <= '1';
+				if (i < 8191) then
+					cpu_addr <= std_logic_vector(to_unsigned(i, cpu_addr'length));
+					romaddr_s <= i;
+					state := DELAY;
+				end if;
+			when DELAY =>
+				state := DELAY2;
+			when DELAY2 =>
+				state := WRITE;
+			when WRITE =>
+--				cpu_wr_s <= '0';
+				cpu_data <= romdata_s;
+				state := READ;
+				i := i + 1;
+		end case;
+	end if;
+
 end process;
 END;

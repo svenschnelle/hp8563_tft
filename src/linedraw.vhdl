@@ -133,6 +133,7 @@ begin
 						ramdata_o(15 downto 4) <= ramdata_i(15 downto 4);
 					when 2 =>
 						ramdata_o(3 downto 0) <= ramdata_i(3 downto 0);
+
 						ramdata_o(7 downto 4) <= color_i or ramdata_i(7 downto 4);
 						ramdata_o(15 downto 8) <= ramdata_i(15 downto 8);
 					when 1 =>
@@ -145,11 +146,6 @@ begin
 					when others =>
 				end case;
 
---				if (ramdata_i = color_i) then
---					ramdata_o <= '1' & ramdata_i(2 downto 0);
---				else
---					ramdata_o <= color_i;
---				end if;
 				if (ram_rdy_i) then
 					if (e > 0) then
 						y := y + incy;
