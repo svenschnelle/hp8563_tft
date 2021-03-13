@@ -362,8 +362,10 @@ begin
 							state := CLEAR_RAM2;
 						end if;
 				when CLEAR_RAM2 =>
-					state := CLEAR_RAM;
-					render_addr_s <= render_addr_s + 1;
+					if (ram_rdy_s) then
+						state := CLEAR_RAM;
+						render_addr_s <= render_addr_s + 1;
+					end if;
 				when FETCH =>
 					vblank_prev_s <= vblank_s;
 					if (not vblank_prev_s and vblank_s) then
