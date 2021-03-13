@@ -18,6 +18,8 @@ vcom  -suppress 1339 -O1 -2008 src/top.vhdl src/dpram.vhdl src/charcopy.vhdl src
 
 vsim work.top_tb
 add wave -radix hex -r -group cpuif /top_tb/uut/cpu_*
+add wave -radix hex -r -group ram0 /top_tb/uut/ram0/*
+add wave -radix hex -r -group ram1 /top_tb/uut/ram1/*
 add wave -radix hex -r /top_tb/uut/read_data_s
 add wave -radix hex -r /top_tb/uut/read_addr_s
 add wave -group cpu -radix hex -r /top_tb/uut/curx_s

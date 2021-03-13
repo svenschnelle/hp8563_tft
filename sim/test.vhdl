@@ -67,7 +67,7 @@ signal sram_data_s: std_logic_vector(15 downto 0);
 signal sram_we_s: std_logic;
 signal sram_oe_s: std_logic;
 signal write_addr_s: integer;
-type state_t is (READ, DELAY, DELAY2, WRITE);
+type state_t is (READ, DELAY, WRITE, WRITE2);
 BEGIN
 	uut: top port map(
 		clk => clk50,
@@ -107,8 +107,6 @@ main: process(clk50)
 variable i: integer := 0;
 variable state: state_t;
 begin
-	cpu_wr_s <= '1';
-
 	if (rising_edge(clk50)) then
 		case state is
 			when READ =>
@@ -119,14 +117,15 @@ begin
 					state := DELAY;
 				end if;
 			when DELAY =>
-				state := DELAY2;
-			when DELAY2 =>
 				state := WRITE;
+				cpu_data <= romdata_s;
 			when WRITE =>
 				cpu_wr_s <= '0';
 				cpu_data <= romdata_s;
-				state := READ;
+				state := WRITE2;
 				i := i + 1;
+			when WRITE2 =>
+				state := READ;
 		end case;
 	end if;
 

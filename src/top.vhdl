@@ -23,7 +23,7 @@
 		      sram_data: inout std_logic_vector(15 downto 0);
 		      sram_oe: out std_logic;
 		      sram_we: out std_logic;
-		sram_ce: out std_logic;
+		      sram_ce: out std_logic;
 		      sram_bhe: out std_logic;
 		      sram_ble: out std_logic;
 		      -- debug
@@ -397,6 +397,7 @@ begin
 								else
 									cury_s <= y;
 									curx_s <= dstx_s;
+									dstx_s <= dstx_s + 1;
 								end if;
 								-- 2404 blank not cleared on y
 								if (plotconfig_s = x"02" or plotconfig_s = x"05") then

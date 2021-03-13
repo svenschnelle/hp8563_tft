@@ -32,6 +32,12 @@ begin
 		if (write_i = '1') then
                   ram_block(write_addr_i) <= write_data_i;
 		end if;
+	end if;
+end process;
+
+process (read_clock_i)
+begin
+	if (rising_edge(read_clock_i)) then
 		read_data_o <= ram_block(read_addr_i);
 	end if;
 end process;
