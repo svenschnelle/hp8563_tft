@@ -4,7 +4,7 @@ TARGET=xc3s500e-4pq208
 #TARGET=xc6slx16-2ftg256
 INTSTYLE=-intstyle silent
 
-PROMGENFLAGS=-w -p mcs -c FF
+PROMGENFLAGS=-w -spi -p mcs -c FF
 MAPFLAGS=-w -pr b -c 100 -t 1
 NGDFLAGS=-nt timestamp -uc src/$(DESIGN).ucf -dd build
 PARFLAGS=-w -ol std
@@ -22,7 +22,7 @@ sim: $(DESIGN)_tb.ghw
 		gtkwave work/$(DESIGN).ghw sim/$(DESIGN)_tb.sav
 
 build/$(DESIGN).mcs:		build/$(DESIGN).bit
-		promgen $(PROMGENFLAGS) -o $@ -u 0 $< -s 4096
+		promgen $(PROMGENFLAGS) -o $@ -u 0 $< -s 1024
 
 build/$(DESIGN).bit:		build/$(DESIGN)_par.ncd
 		bitgen -w $< $@
@@ -32,7 +32,7 @@ build/$(DESIGN)_par.ncd:	build/$(DESIGN).ncd
 
 build/$(DESIGN).ncd:		build/$(DESIGN).ngd
 		map -p $(TARGET) $(MAPFLAGS) -o $@ $<
-		#cpldfit -p $(TARGET) $(CPLDFITFLAGS) $<
+
 build/$(DESIGN).ngd:		build/$(DESIGN).ngc src/$(DESIGN).ucf
 		ngdbuild -p $(TARGET) $(NGDFLAGS) $< $@
 

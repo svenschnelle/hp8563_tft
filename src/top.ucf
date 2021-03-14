@@ -31,9 +31,9 @@ NET "cpu_addr<6>" LOC="P96" | IOSTANDARD = LVCMOS33;     # C29
 NET "cpu_addr<7>" LOC="P97" | IOSTANDARD = LVCMOS33;     # A30
 NET "cpu_addr<8>" LOC="P98" | IOSTANDARD = LVCMOS33;     # B30
 NET "cpu_addr<9>" LOC="P101" | IOSTANDARD = LVCMOS33;    # C30
-NET "cpu_addr<10>" LOC="P99" | IOSTANDARD = LVCMOS33;    # A31
-NET "cpu_addr<11>" LOC="P100" | IOSTANDARD = LVCMOS33;   # B31
-NET "cpu_addr<12>" LOC="P102" | IOSTANDARD = LVCMOS33;   # C31
+NET "cpu_addr<10>" LOC="P194" | IOSTANDARD = LVCMOS33;    # A5
+NET "cpu_addr<11>" LOC="P175" | IOSTANDARD = LVCMOS33;   # A7
+NET "cpu_addr<12>" LOC="P174" | IOSTANDARD = LVCMOS33;   # B7
 #NET "cpu_addr<13>" LOC="PM11" | IOSTANDARD = LVCMOS33;   # U8-60
 #
 ## SRAM

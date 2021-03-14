@@ -454,7 +454,9 @@ begin
 								end if;
 								visible := false;
 							when x"b" =>
-								dpaddr <= 2048 + to_integer(unsigned(read_data_s(11 downto 1)));
+								if (read_data_s(11 downto 0) /= x"000") then
+									dpaddr <= 2048 + to_integer(unsigned(read_data_s(11 downto 1)));
+								end if;
 								visible := false;
 							when x"c" => -- char bright
 								charcopy_color_s <= x"c";
