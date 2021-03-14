@@ -12,7 +12,7 @@ vcom -work unimacro /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unimacro/unimacro_VCOMP
 vlib work
 vcom  -suppress 1339 -O1 -2008 src/top.vhdl src/dpram.vhdl src/charcopy.vhdl src/fontrom.vhdl \
 	src/vga.vhdl sim/test.vhdl sim/package_timing.vhd \
-	sim/package_utility.vhd sim/async_1Mx16.vhd src/charmap.vhdl src/linedraw.vhdl src/testrom.vhdl
+	sim/package_utility.vhd sim/async_1Mx16.vhd src/charmap.vhdl src/linedraw.vhdl src/charset.vhdl
 
 
 
@@ -45,6 +45,6 @@ add wave -group sram -radix hex -r /top_tb/uut/sram_data
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/state
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/ramdata
 #add wave -group charcopy -radix ascii -r /top_tb/uut/charcopyi/char_i
-run 50ms
+run 10ms
 
 mem save -o mem0.mem -f mti -data hex -addr hex -wordsperline 160 /top_tb/sram/line__100/mem_array

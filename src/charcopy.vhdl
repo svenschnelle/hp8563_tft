@@ -60,7 +60,7 @@ begin
 			when IDLE =>
 				ram_we_o <= false;
 				if (req_i) then
-					charstart := ((char_i - 32) * 14 * 12);
+					charstart := char_i * 14 * 12;
 					font_addr_s <= charstart;
 					rdy_o <= false;
 					state := WAITSTATE;
