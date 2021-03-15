@@ -1,7 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
-
+use std.textio.all;
 ENTITY top_tb IS
 END top_tb;
 
@@ -16,9 +16,9 @@ component top is
 	-- lcd port
 	vsync_o: out std_logic;
 	hsync_o: out std_logic;
-	r: out std_logic_vector(1 downto 0);
-	g: out std_logic_vector(1 downto 0);
-	b: out std_logic_vector(1 downto 0);
+	r: out std_logic_vector(2 downto 0);
+	g: out std_logic_vector(2 downto 0);
+	b: out std_logic_vector(2 downto 0);
 	-- cpu interface
 	cpu_data: in std_logic_vector(15 downto 0);
 	cpu_addr: in std_logic_vector(12 downto 0);
@@ -31,7 +31,10 @@ component top is
 	sram_oe: out std_logic;
 	sram_we: out std_logic;
 
-	led1: out std_logic);
+	led1: out std_logic;
+	debug_txe: in std_logic;
+	debug_rxf: in std_logic;
+	debug_d: inout std_logic_vector(7 downto 0));
   end component;
 
 component async_1Mx16 is
@@ -67,7 +70,12 @@ signal sram_data_s: std_logic_vector(15 downto 0);
 signal sram_we_s: std_logic;
 signal sram_oe_s: std_logic;
 signal write_addr_s: integer;
+signal debug_d_s: std_logic_vector(7 downto 0);
+signal debug_txe_s: std_logic := '0';
+signal debug_rxf_s: std_logic := '1';
+type ramfile is file of character;
 type state_t is (READ, DELAY, WRITE, WRITE2);
+
 BEGIN
 	uut: top port map(
 		clk => clk50,
@@ -79,7 +87,10 @@ BEGIN
 		sram_addr => sram_addr_s,
 		sram_data => sram_data_s,
 		sram_oe => sram_oe_s,
-		sram_we => sram_we_s);
+		sram_we => sram_we_s,
+		debug_txe => debug_txe_s,
+		debug_rxf => debug_rxf_s,
+		debug_d => debug_d_s);
 
 	rom: testrom port map(
 		read_clock_i => clk50,
@@ -101,27 +112,29 @@ begin
 	clk50 <= not clk50;
 end process clocker;
 
-
-
 main: process(clk50)
 variable i: integer := 0;
 variable state: state_t;
+variable charbufh: character;
+variable charbufl: character;
+file datafile: ramfile open read_mode is "sim/300mhz.bin";
 begin
 	if (rising_edge(clk50)) then
 		case state is
 			when READ =>
 				cpu_wr_s <= '1';
-				if (i < 8191) then
+				if (i < 4095) then
 					cpu_addr <= std_logic_vector(to_unsigned(i, cpu_addr'length));
-					romaddr_s <= i;
+					Read(datafile, charbufh);
+					Read(datafile, charbufl);
 					state := DELAY;
 				end if;
 			when DELAY =>
 				state := WRITE;
-				cpu_data <= romdata_s;
+				cpu_data <= std_logic_vector(to_unsigned(natural(character'pos(charbufh)), 8)) &
+					    std_logic_vector(to_unsigned(natural(character'pos(charbufl)), 8));
 			when WRITE =>
 				cpu_wr_s <= '0';
-				cpu_data <= romdata_s;
 				state := WRITE2;
 				i := i + 1;
 			when WRITE2 =>

@@ -45,6 +45,6 @@ add wave -group sram -radix hex -r /top_tb/uut/sram_data
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/state
 #add wave -group charcopy -radix hex -r /top_tb/uut/charcopyi/copy/ramdata
 #add wave -group charcopy -radix ascii -r /top_tb/uut/charcopyi/char_i
-run 10ms
+run 50ms
 
 mem save -o mem0.mem -f mti -data hex -addr hex -wordsperline 160 /top_tb/sram/line__100/mem_array

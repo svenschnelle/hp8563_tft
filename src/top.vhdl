@@ -27,7 +27,12 @@
 		      sram_bhe: out std_logic;
 		      sram_ble: out std_logic;
 		      -- debug
-		      led1: out std_logic);
+		      led1: out std_logic;
+		      debug_d: inout std_logic_vector(7 downto 0);
+		      debug_txe: in std_logic;
+		      debug_rxf: in std_logic;
+		      debug_wr: out std_logic;
+		      debug_rd: out std_logic);
 	end top;
 
 	architecture rtl of top is
@@ -169,7 +174,7 @@
 	signal dpaddr_next: integer range 0 to 8191 := 0;
 	constant XINIT: integer := 60;
 
-	type render_state_t is (IDLE, CLEAR_RAM, CLEAR_RAM2, FETCH, FETCH2, EXECUTE, CHARCOPY_WAIT, CHARCOPY_WAIT1, LINEDRAW_WAIT, LINEDRAW_WAIT1);
+	type render_state_t is (IDLE, CLEAR_RAM, CLEAR_RAM2, CLEAR_RAM3, FETCH, FETCH2, EXECUTE, CHARCOPY_WAIT, CHARCOPY_WAIT1, LINEDRAW_WAIT, LINEDRAW_WAIT1);
 
 	begin
 		ram0: dpram generic map(
@@ -333,6 +338,7 @@ render: process(reset_s, clk)
 	variable x: integer;
 	variable y: integer;
 	variable plotconfig_s: std_logic_vector(7 downto 0);
+	variable dumpaddr: integer := 0;
 begin
 	if (reset_s) then
 			rambank0_active_s <= false;
@@ -341,6 +347,8 @@ begin
 			dsty_s <= 0;
 			curx_s <= 512;
 			cury_s <= 0;
+			debug_wr <= '1';
+			debug_rd <= '1';
 		elsif (rising_edge(clk)) then
 			read_addr_s <= dpaddr;
 
@@ -352,27 +360,48 @@ begin
 					dstx_s <= 512;
 					dsty_s <= 0;
 				when CLEAR_RAM =>
-						if (render_addr_s = (640*480/4)-1) then
-							state := FETCH;
-							render_addr_s <= 0;
-							render_we_s <= false;
+					if (dumpaddr < 16384) then
+						if (dumpaddr mod 2 = 1) then
+							debug_d <= read_data_s(7 downto 0);
 						else
-							render_we_s <= true;
-							render_write_data_s <= x"0000";
-							state := CLEAR_RAM2;
+							debug_d <= read_data_s(15 downto 8);
 						end if;
+					else
+						dumpaddr := 0;
+					end if;
+					if (render_addr_s = (640*480/4)-1) then
+						dpaddr <= 0;
+						state := FETCH;
+						render_addr_s <= 0;
+						render_we_s <= false;
+					else
+						render_we_s <= true;
+						render_write_data_s <= x"0000";
+						state := CLEAR_RAM2;
+					end if;
 				when CLEAR_RAM2 =>
+					if (dumpaddr mod 2 = 1) then
+						debug_d <= read_data_s(7 downto 0);
+					else
+						debug_d <= read_data_s(15 downto 8);
+					end if;
 					if (ram_rdy_s) then
-						state := CLEAR_RAM;
+						debug_wr <= '0';
+						state := CLEAR_RAM3;
 						render_addr_s <= render_addr_s + 1;
 					end if;
+				when CLEAR_RAM3 =>
+					state := CLEAR_RAM;
 				when FETCH =>
 					vblank_prev_s <= vblank_s;
 					if (not vblank_prev_s and vblank_s) then
 						rambank0_active_s <= not rambank0_active_s;
 						render_addr_s <= 0;
+						debug_wr <= '1';
+						dumpaddr := dumpaddr + 1;
 						state := CLEAR_RAM;
-						dpaddr <= 0;
+						read_addr_s <= dumpaddr/2;
+						dpaddr <= dumpaddr/2;
 					else
 						read_addr_s <= dpaddr;
 						dpaddr <= dpaddr + 1;
@@ -383,7 +412,7 @@ begin
 				when EXECUTE =>
 					state := FETCH;
 					if (dpaddr < 8191) then
-						y := 768-to_integer(unsigned(read_data_s(9 downto 0)));
+						y := 773-to_integer(unsigned(read_data_s(9 downto 0)));
 						if (to_integer(unsigned(read_data_s(9 downto 0))) > 80) then
 							x := to_integer(unsigned(read_data_s(9 downto 0))) - 80;
 						else
@@ -399,7 +428,9 @@ begin
 								else
 									cury_s <= y;
 									curx_s <= dstx_s;
-									dstx_s <= dstx_s + 1;
+									if (dstx_s < 1023) then
+										dstx_s <= dstx_s + 1;
+									end if;
 								end if;
 								-- 2404 blank not cleared on y
 								if (plotconfig_s = x"02" or plotconfig_s = x"05") then
@@ -413,7 +444,9 @@ begin
 								end if;
 
 								dsty_s <= y;
-								dstx_s <= dstx_s + 1;
+								if (dstx_s < 1023) then
+									dstx_s <= dstx_s + 1;
+								end if;
 								curx_s <= dstx_s;
 								cury_s <= dsty_s;
 								if (read_data_s(10) = '1') then
@@ -449,14 +482,14 @@ begin
 								dstx_s <= x;
 
 							when x"a" =>
-								if (read_data_s(11 downto 0) /= x"000") then
+--								if (read_data_s(11 downto 0) /= x"000") then
 									dpaddr <= to_integer(unsigned(read_data_s(11 downto 1)));
-								end if;
+--								end if;
 								visible := false;
 							when x"b" =>
-								if (read_data_s(11 downto 0) /= x"000") then
+--								if (read_data_s(11 downto 0) /= x"000") then
 									dpaddr <= 2048 + to_integer(unsigned(read_data_s(11 downto 1)));
-								end if;
+--								end if;
 								visible := false;
 							when x"c" => -- char bright
 								charcopy_color_s <= x"c";
