@@ -482,15 +482,13 @@ begin
 								dstx_s <= x;
 
 							when x"a" =>
---								if (read_data_s(11 downto 0) /= x"000") then
-									dpaddr <= to_integer(unsigned(read_data_s(11 downto 1)));
---								end if;
+								dpaddr <= to_integer(unsigned(read_data_s(11 downto 1)));
 								visible := false;
+
 							when x"b" =>
---								if (read_data_s(11 downto 0) /= x"000") then
-									dpaddr <= 2048 + to_integer(unsigned(read_data_s(11 downto 1)));
---								end if;
+								dpaddr <= 2048 + to_integer(unsigned(read_data_s(11 downto 1)));
 								visible := false;
+
 							when x"c" => -- char bright
 								charcopy_color_s <= x"c";
 								charcopy_req_s <= true;

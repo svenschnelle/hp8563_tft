@@ -33,6 +33,7 @@ variable c1: boolean;
 variable dx, t, x1, x2, x, y,y1, y2, dy: integer range 0 to 639 := 0;
 variable incy: integer range -1 to 1 := 0;
 variable e, horiz, diago: integer;
+variable idx: integer;
 begin
 	if (reset_i) then
 		state := IDLE;
@@ -127,23 +128,15 @@ begin
 				end if;
 			when DRAW_WRITE =>
 				ram_we_o <= true;
-				case (ramaddr_s mod 4) is
-					when 3 =>
-						ramdata_o(3 downto 0) <= color_i or ramdata_i(3 downto 0);
-						ramdata_o(15 downto 4) <= ramdata_i(15 downto 4);
-					when 2 =>
-						ramdata_o(3 downto 0) <= ramdata_i(3 downto 0);
-
-						ramdata_o(7 downto 4) <= color_i or ramdata_i(7 downto 4);
-						ramdata_o(15 downto 8) <= ramdata_i(15 downto 8);
-					when 1 =>
-						ramdata_o(7 downto 0) <= ramdata_i(7 downto 0);
-						ramdata_o(11 downto 8) <= color_i or ramdata_i(11 downto 8);
-						ramdata_o(15 downto 12) <= ramdata_i(15 downto 12);
-					when 0 =>
-						ramdata_o(11 downto 0) <= ramdata_i(11 downto 0);
-						ramdata_o(15 downto 12) <= color_i or ramdata_i(15 downto 12);
+				ramdata_o <= ramdata_i;
+				idx := 3-(ramaddr_s mod 4);
+				case color_i is
+					when x"d" | x"e" =>
+						ramdata_o(3 + idx * 4 downto idx * 4) <= color_i;
 					when others =>
+						if (ramdata_i(3 + idx * 4 downto idx * 4) /= x"4" and ramdata_i(3 + idx * 4 downto idx * 4) /= x"c") then
+							ramdata_o(3 + idx * 4 downto idx * 4) <= color_i or ramdata_i(3 + idx * 4 downto idx * 4);
+						end if;
 				end case;
 
 				if (ram_rdy_i) then

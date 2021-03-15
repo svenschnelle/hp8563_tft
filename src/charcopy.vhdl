@@ -45,7 +45,7 @@ type state_t is (IDLE, WAITSTATE, READ, UPDATE_READ, UPDATE_WAIT, UPDATE_WRITE);
 variable state: state_t;
 variable charstart: integer;
 variable cur_x: integer := 0;
-
+variable idx: integer;
 begin
 	if (reset_i) then
 		state := IDLE;
@@ -93,7 +93,7 @@ begin
 					end if;
 				end if;
 			when UPDATE_READ =>
-				ramaddr_s <= ((dsty_i + cur_y + 3) * 640 + dstx_i + cur_x + 8);
+				ramaddr_s <= ((dsty_i + cur_y + 3) * 640 + dstx_i + cur_x + 10);
 				state := UPDATE_WAIT;
 
 			when UPDATE_WAIT =>
@@ -103,23 +103,10 @@ begin
 
 			when UPDATE_WRITE =>
 				ram_we_o <= true;
-				case (ramaddr_s mod 4) is
-					when 3 =>
-						ramdata_o(3 downto 0) <= color_i or ramdata_i(3 downto 0);
-						ramdata_o(15 downto 4) <= ramdata_i(15 downto 4);
-					when 2 =>
-						ramdata_o(3 downto 0) <= ramdata_i(3 downto 0);
-						ramdata_o(7 downto 4) <= color_i or ramdata_i(7 downto 4);
-						ramdata_o(15 downto 8) <= ramdata_i(15 downto 8);
-					when 1 =>
-						ramdata_o(7 downto 0) <= ramdata_i(7 downto 0);
-						ramdata_o(11 downto 8) <= color_i or ramdata_i(11 downto 8);
-						ramdata_o(15 downto 12) <= ramdata_i(15 downto 12);
-					when 0 =>
-						ramdata_o(11 downto 0) <= ramdata_i(11 downto 0);
-						ramdata_o(15 downto 12) <= color_i or ramdata_i(15 downto 12);
-					when others =>
-				end case;
+				ramdata_o <= ramdata_i;
+				idx := 3-(ramaddr_s mod 4);
+				ramdata_o(3 + idx * 4 downto idx * 4) <= color_i or ramdata_i(3 + idx * 4 downto idx * 4);
+
 				if (ram_rdy_i) then
 					if (cur_x = 13) then
 						cur_x := 0;
