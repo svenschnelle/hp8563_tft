@@ -117,7 +117,7 @@ variable i: integer := 0;
 variable state: state_t;
 variable charbufh: character;
 variable charbufl: character;
-file datafile: ramfile open read_mode is "sim/300mhz.bin";
+file datafile: ramfile open read_mode is "sim/sweep_wrong_color.bin";
 begin
 	if (rising_edge(clk50)) then
 		case state is

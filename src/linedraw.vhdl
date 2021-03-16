@@ -131,12 +131,19 @@ begin
 				ramdata_o <= ramdata_i;
 				idx := 3-(ramaddr_s mod 4);
 				case color_i is
-					when x"d" | x"e" =>
+					when x"f" | x"d" | x"e" =>
 						ramdata_o(3 + idx * 4 downto idx * 4) <= color_i;
-					when others =>
-						if (ramdata_i(3 + idx * 4 downto idx * 4) /= x"4" and ramdata_i(3 + idx * 4 downto idx * 4) /= x"c") then
-							ramdata_o(3 + idx * 4 downto idx * 4) <= color_i or ramdata_i(3 + idx * 4 downto idx * 4);
+					when x"7" =>
+						if (ramdata_i(3 + idx * 4 downto idx * 4) = x"7") then
+							ramdata_o(3 + idx * 4 downto idx * 4) <= x"f";
+						elsif (ramdata_i(3 + idx * 4 downto idx * 4) /= x"4" and
+						       ramdata_i(3 + idx * 4 downto idx * 4) /= x"c" and
+						       ramdata_i(3 + idx * 4 downto idx * 4) /= x"e") then
+							ramdata_o(3 + idx * 4 downto idx * 4) <= x"7";
 						end if;
+					when others =>
+							ramdata_o(3 + idx * 4 downto idx * 4) <= color_i or ramdata_i(3 + idx * 4 downto idx * 4);
+--						end if;
 				end case;
 
 				if (ram_rdy_i) then
