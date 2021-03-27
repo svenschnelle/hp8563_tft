@@ -93,7 +93,7 @@ begin
 					end if;
 				end if;
 			when UPDATE_READ =>
-				ramaddr_s <= ((dsty_i + cur_y + 3) * 640 + dstx_i + cur_x + 10);
+				ramaddr_s <= ((dsty_i + cur_y + 3) * 640 + dstx_i + cur_x + 8);
 				state := UPDATE_WAIT;
 
 			when UPDATE_WAIT =>

@@ -31,10 +31,7 @@ component top is
 	sram_oe: out std_logic;
 	sram_we: out std_logic;
 
-	led1: out std_logic;
-	debug_txe: in std_logic;
-	debug_rxf: in std_logic;
-	debug_d: inout std_logic_vector(7 downto 0));
+	led1: out std_logic);
   end component;
 
 component async_1Mx16 is
@@ -70,9 +67,6 @@ signal sram_data_s: std_logic_vector(15 downto 0);
 signal sram_we_s: std_logic;
 signal sram_oe_s: std_logic;
 signal write_addr_s: integer;
-signal debug_d_s: std_logic_vector(7 downto 0);
-signal debug_txe_s: std_logic := '0';
-signal debug_rxf_s: std_logic := '1';
 type ramfile is file of character;
 type state_t is (READ, DELAY, WRITE, WRITE2);
 
@@ -87,10 +81,7 @@ BEGIN
 		sram_addr => sram_addr_s,
 		sram_data => sram_data_s,
 		sram_oe => sram_oe_s,
-		sram_we => sram_we_s,
-		debug_txe => debug_txe_s,
-		debug_rxf => debug_rxf_s,
-		debug_d => debug_d_s);
+		sram_we => sram_we_s);
 
 	rom: testrom port map(
 		read_clock_i => clk50,
@@ -117,7 +108,7 @@ variable i: integer := 0;
 variable state: state_t;
 variable charbufh: character;
 variable charbufl: character;
-file datafile: ramfile open read_mode is "sim/sweep_wrong_color.bin";
+file datafile: ramfile open read_mode is "sim/test_pattern.bin";
 begin
 	if (rising_edge(clk50)) then
 		case state is

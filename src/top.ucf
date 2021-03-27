@@ -3,8 +3,8 @@ NET CLK            LOC = "P185" | PERIOD = 50MHz HIGH 50%;
 #
 ## CPU interface
 NET "cpu_clk" LOC="P120" | IOSTANDARD = LVCMOS33;        # B20
-NET "cpu_weh" LOC="P119" | IOSTANDARD = LVCMOS33; # C20
-NET "cpu_wel" LOC="P118" | IOSTANDARD = LVCMOS33; # B20
+NET "cpu_weh" LOC="P118" | IOSTANDARD = LVCMOS33; # C20
+NET "cpu_wel" LOC="P119" | IOSTANDARD = LVCMOS33; # B20
 NET "cpu_data<0>" LOC="P115" | IOSTANDARD = LVCMOS33;    # B21
 NET "cpu_data<1>" LOC="P113" | IOSTANDARD = LVCMOS33;    # C21
 NET "cpu_data<2>" LOC="P112" | IOSTANDARD = LVCMOS33;    # A23
@@ -13,7 +13,7 @@ NET "cpu_data<4>" LOC="P109" | IOSTANDARD = LVCMOS33;    # C23
 NET "cpu_data<5>" LOC="P108" | IOSTANDARD = LVCMOS33;    # A24
 NET "cpu_data<6>" LOC="P107" | IOSTANDARD = LVCMOS33;    # B24
 NET "cpu_data<7>" LOC="P106" | IOSTANDARD = LVCMOS33;    # C24
-NET "cpu_data<8>" LOC="P55" | IOSTANDARD = LVCMOS33;     # A25
+NET "cpu_data<8>" LOC="P159" | IOSTANDARD = LVCMOS33;     # C9
 NET "cpu_data<9>" LOC="P41" | IOSTANDARD = LVCMOS33;     # B25
 NET "cpu_data<10>" LOC="P62" | IOSTANDARD = LVCMOS33;    # C25
 NET "cpu_data<11>" LOC="P63" | IOSTANDARD = LVCMOS33;    # A26

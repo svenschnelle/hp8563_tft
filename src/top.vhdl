@@ -384,7 +384,11 @@ begin
 				when EXECUTE =>
 					state := FETCH;
 					if (dpaddr < 8191 and read_data_s /= x"a000") then
-						y := 773-to_integer(unsigned(read_data_s(9 downto 0)));
+						if (to_integer(unsigned(read_data_s(9 downto 0))) > 770) then
+							y := 0;
+						else
+							y := 768-to_integer(unsigned(read_data_s(9 downto 0)));
+						end if;
 						if (to_integer(unsigned(read_data_s(9 downto 0))) > 80) then
 							x := to_integer(unsigned(read_data_s(9 downto 0))) - 80;
 						else
