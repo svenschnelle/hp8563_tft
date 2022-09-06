@@ -1,5 +1,3 @@
-
-#vcom /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unimacro/BRAM_SINGLE_MACRO.vhd
 vlib unisim
 vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/unisim_VCOMP.vhd
 vcom -work unisim /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src/unisims/unisim_VPKG.vhd
@@ -47,4 +45,5 @@ add wave -group sram -radix hex -r /top_tb/uut/sram_data
 #add wave -group charcopy -radix ascii -r /top_tb/uut/charcopyi/char_i
 run 50ms
 
-mem save -o mem0.mem -f mti -data hex -addr hex -wordsperline 160 /top_tb/sram/line__100/mem_array
+mem save -o sim/lcd.mem -f mti -data hex -noaddress -wordsperline 1 /top_tb/sram/line__100/mem_array
+exec sim/convert.py
